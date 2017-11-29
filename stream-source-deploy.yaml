@@ -1,0 +1,19 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: stream-source-client01
+spec:
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        cni: "opencontrail"
+      labels:
+        run: stream-source-client01
+    spec:
+      containers:
+      - name: stream-source
+        image: michalskalski/docker-nginx-rtmp
+        ports:
+        - containerPort: 80
+        - containerPort: 1935

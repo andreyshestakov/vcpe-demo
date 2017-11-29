@@ -1,0 +1,10 @@
+apiVersion: "virtlet.k8s/v1"
+kind: VirtletImageMapping
+metadata:
+  name: primary
+  namespace: kube-system
+spec:
+  prefix: ""
+  translations:
+   - name: vyos-cloudinit
+     url: http://172.16.10.92/vyos.qcow2

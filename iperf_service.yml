@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: iperf-client01
+  labels:
+    run: iperf-client01
+spec:
+  ports:
+  - port: 5001
+    targetPort: 5001
+    protocol: TCP
+    name: iperf-client01
+  selector:
+    run: iperf-client01

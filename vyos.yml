@@ -1,0 +1,198 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: vyos
+  annotations:
+    cni: "flannel,opencontrail"
+    kubernetes.io/target-runtime: virtlet.cloud
+    VirtletCloudInitUserDataScript: |
+      #vyos-config
+      interfaces {
+          ethernet eth0 {
+            address dhcp
+            dhcpv6-options {
+            }
+            duplex auto
+            smp_affinity auto
+            speed auto
+          }
+          ethernet eth1 {
+            address dhcp
+            dhcpv6-options {
+            }
+            duplex auto
+            smp_affinity auto
+            speed auto
+          }
+          loopback lo {
+          }
+      }
+      nat {
+          destination {
+            rule 10 {
+                destination {
+                  port 80,1935
+                }
+                inbound-interface eth0
+                protocol tcp
+                translation {
+                  address 10.254.77.46
+                }
+            }
+            rule 20 {
+                destination {
+                  port 5001
+                }
+                inbound-interface eth0
+                protocol tcp
+                translation {
+                  address 10.254.245.244
+                }
+            }
+          }
+          source {
+            rule 200 {
+                destination {
+                  address 10.254.0.0/16
+                  port 80,1935,5001
+                }
+                outbound-interface eth1
+                protocol tcp
+                translation {
+                  address masquerade
+                }
+            }
+          }
+      }
+      protocols {
+          static {
+            route 10.8.0.2/32 {
+                next-hop 10.244.1.1 {
+                }
+            }
+            route 10.244.2.0/24 {
+                next-hop 10.244.1.1 {
+                }
+            }
+          }
+      }
+      service {
+          ssh {
+            port 22
+          }
+      }
+      system {
+          config-management {
+            commit-revisions 20
+          }
+          console {
+            device ttyS0 {
+                speed 9600
+            }
+          }
+          host-name vyos
+          login {
+            user vyos {
+                authentication {
+                  encrypted-password $1$H/s4nrZs$qmUTDddgBB5K5Ocm97pHC.
+                  plaintext-password ""
+                }
+                level admin
+            }
+          }
+          ntp {
+            server 0.pool.ntp.org {
+            }
+            server 1.pool.ntp.org {
+            }
+            server 2.pool.ntp.org {
+            }
+          }
+          package {
+            auto-sync 1
+            repository community {
+                components main
+                distribution helium
+                password ""
+                url http://packages.vyos.net/vyos
+                username ""
+            }
+          }
+          syslog {
+            global {
+                facility all {
+                  level notice
+                }
+                facility protocols {
+                  level debug
+                }
+            }
+          }
+          time-zone UTC
+      }
+      traffic-policy {
+          shaper IPERF {
+              bandwidth 10000
+              class 5 {
+                  bandwidth 2%
+                  ceiling 95%
+                  match IPERF {
+                      ip {
+                          destination {
+                              address 10.254.81.229/32
+                          }
+                      }
+                  }
+              }
+              default {
+                  bandwidth 100%
+                  ceiling 100%
+              }
+          }
+          shaper STREAM {
+              bandwidth 10000
+              class 5 {
+                  bandwidth 2%
+                  ceiling 95%
+                  match HTTP {
+                      ip {
+                          protocol tcp
+                          source {
+                              port 80
+                          }
+                      }
+                  }
+              }
+              default {
+                  bandwidth 100%
+                  ceiling 100%
+              }
+          }
+      }
+    VirtletSSHKeys: |
+      ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDhFfnUDg/6Hpl3iZJ/MacN7tiKt+C+U/cCKnFMnEcXbm/E8Dicb5H7QExyI3kcBD1HSCPsvH6WanIrRutOhdUi1BKQ4B5udjZ2lVN0Xv04JJ0YTshe0TTXNLCs4LmaMhqns1yPyEPXRnapc2FQTQT9RDIPQqZl/Lad2+GXbyOAZ5bLy6CF+pConZlc6APoiwUMaY/o7xm4L/qhwqK5TQ+XKvT8BmIPBSOaRAcgzkeA0+i3m4mrFWmIugEF+ItEs5CUSUnhFFj+D0dqhkWmoau0vwm4i3TenaebzyTRyedGJja6H9y6xpdjoWlOCeOCbq2pMaFHr7r4PuB+4CK3hYvD root@ctl01
+spec:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: extraRuntime
+            operator: In
+            values:
+            - virtlet
+  # This is the number of seconds Virtlet gives the VM to shut down cleanly.
+  # The default value of 30 seconds is ok for containers but probably too
+  # low for VM, so overriding it here is strongly advised.
+  terminationGracePeriodSeconds: 120
+  containers:
+  - name: vyos
+    image: virtlet.cloud/vyos-cloudinit
+    imagePullPolicy: IfNotPresent
+    # tty and stdin required for `kubectl attach -t` to work
+    tty: true
+    stdin: true
+    resources:
+      limits:
+        # This memory limit is applied to the libvirt domain definition
+        memory: 1600Mi

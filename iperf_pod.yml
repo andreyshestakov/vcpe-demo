@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: iperf-client01
+  annotations:
+    cni: "opencontrail"
+  labels:
+    run: iperf-client01
+spec:
+  containers:
+  - name: iperf-client01
+    image: mlabbe/iperf
+    command: ["/usr/bin/iperf"]
+    args: ["-s -p 5001 -i 10"]
+  restartPolicy: Always
