@@ -1,0 +1,21 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: stream-cache-client01
+spec:
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        cni: "flannel"
+      labels:
+        run: stream-cache-client01
+    spec:
+      containers:
+      - name: nginx-cache
+        image: michalskalski/docker-nginx-rtmp:frontend
+        env:
+        - name: HLS_STREAM_SOURCE
+          value: http://10.244.1.78
+        ports:
+        - containerPort: 80

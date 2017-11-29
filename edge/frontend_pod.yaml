@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: frontend-client01
+  annotations:
+    cni: "flannel"
+spec:
+  containers:
+  - name: frontend-client01
+    image: nginx:1.10-alpine
+    volumeMounts:
+    - name: config-volume
+      mountPath: /etc/nginx
+    - name: site
+      mountPath: /www
+  volumes:
+  - name: config-volume
+    configMap:
+      name: nginx-client01
+      items:
+      - key: nginx.conf
+        path: nginx.conf
+  - name: site
+    configMap:
+      name: nginx-client01
+      items:
+      - key: index.html
+        path: index.html
