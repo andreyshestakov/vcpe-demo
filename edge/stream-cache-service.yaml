@@ -5,6 +5,7 @@ metadata:
   labels:
     run: stream-cache-client01
 spec:
+  clusterIP: 10.201.100.50
   ports:
   - port: 80
     protocol: TCP

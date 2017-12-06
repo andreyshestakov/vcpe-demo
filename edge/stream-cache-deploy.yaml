@@ -7,7 +7,7 @@ spec:
   template:
     metadata:
       annotations:
-        cni: "flannel"
+        cni: "calico"
       labels:
         run: stream-cache-client01
     spec:
@@ -16,6 +16,6 @@ spec:
         image: michalskalski/docker-nginx-rtmp:frontend
         env:
         - name: HLS_STREAM_SOURCE
-          value: http://10.244.1.78
+          value: http://___CORE_ENDPOINT___
         ports:
         - containerPort: 80

@@ -3,7 +3,8 @@ kind: Pod
 metadata:
   name: frontend-client01
   annotations:
-    cni: "flannel"
+    cni: "calico,flannel"
+    multi-ip-preferences: '{"ips": {}}'
 spec:
   containers:
   - name: frontend-client01

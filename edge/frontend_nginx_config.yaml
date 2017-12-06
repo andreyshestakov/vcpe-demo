@@ -15,7 +15,7 @@ data:
         disable_symlinks off;
         # Pass requests about hls to cache servers
         location ~ \.(m3u8|ts|trp) {
-            proxy_pass http://stream-cache-client01;
+            proxy_pass http://10.201.100.50;
         }
         location /_healthz {
           add_header Content-Type text/plain;
