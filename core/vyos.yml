@@ -4,6 +4,7 @@ metadata:
   name: vyos
   annotations:
     cni: "flannel,opencontrail"
+    multi-ip-preferences: "{ips: {}}"
     kubernetes.io/target-runtime: virtlet.cloud
     VirtletCloudInitUserDataScript: |
       #vyos-config
@@ -23,6 +24,9 @@ metadata:
             duplex auto
             smp_affinity auto
             speed auto
+            traffic-policy {
+              out IPERF
+            }
           }
           loopback lo {
           }
@@ -36,7 +40,7 @@ metadata:
                 inbound-interface eth0
                 protocol tcp
                 translation {
-                  address 10.254.77.46
+                  address 10.254.100.200
                 }
             }
             rule 20 {
@@ -46,7 +50,7 @@ metadata:
                 inbound-interface eth0
                 protocol tcp
                 translation {
-                  address 10.254.245.244
+                  address 10.254.100.100
                 }
             }
           }
@@ -66,12 +70,16 @@ metadata:
       }
       protocols {
           static {
-            route 10.8.0.2/32 {
+            route 0.0.0.0/0 {
                 next-hop 10.244.1.1 {
                 }
             }
-            route 10.244.2.0/24 {
+            route 10.254.0.10/32 {
                 next-hop 10.244.1.1 {
+                }
+            }
+            route 10.254.0.0/16 {
+                next-hop 10.150.255.254 {
                 }
             }
           }
@@ -138,8 +146,10 @@ metadata:
                   ceiling 95%
                   match IPERF {
                       ip {
-                          destination {
-                              address 10.254.81.229/32
+                          protocol tcp {
+                              source {
+                                port 5001
+                              }
                           }
                       }
                   }

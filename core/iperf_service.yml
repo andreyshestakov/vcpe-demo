@@ -5,6 +5,7 @@ metadata:
   labels:
     run: iperf-client01
 spec:
+  clusterIP: 10.254.100.100
   ports:
   - port: 5001
     targetPort: 5001

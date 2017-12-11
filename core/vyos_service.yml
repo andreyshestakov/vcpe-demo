@@ -1,19 +1,22 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: stream-source-client01
+  name: vyos
   labels:
-    run: stream-source-client01
+    run: vyos
 spec:
-  clusterIP: 10.254.100.200
   ports:
   - port: 80
     targetPort: 80
     protocol: TCP
-    name: clients-endpoint
+    name: vyos-80
   - port: 1935
     targetPort: 1935
     protocol: TCP
-    name: stream-target
+    name: vyos-1935
+  - port: 5001
+    targetPort: 5001
+    protocol: TCP
+    name: vyos-iperf
   selector:
-    run: stream-source-client01
+    run: vyos

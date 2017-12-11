@@ -1,3 +1,5 @@
 #!/bin/bash
 
-ffmpeg -f concat -safe 0 -i playlist.txt -threads 1 -vcodec flv -acodec copy -s 1280x720 -f flv rtmp://10.244.1.78:1935/stream/client01
+IP=10.244.1.7
+
+ffmpeg -f concat -safe 0 -i playlist.txt -threads 2 -vcodec flv -acodec copy -s 1280x720 -f flv rtmp://${IP}:1935/stream/client01
