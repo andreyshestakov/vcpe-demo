@@ -2,6 +2,11 @@
 
 set -e
 
+SCRIPT=`realpath $0`
+SCRIPTPATH=`dirname $SCRIPT`
+
+cd "${SCRIPTPATH}"
+
 IP=$1
 
 # Create cache
@@ -13,8 +18,3 @@ kubectl apply -f frontend_nginx_config.yaml
 # only once yet :(
 kubectl apply -f frontend_pod.yaml 
 
-sleep 10
-
-IP="$(kubectl get po/frontend-client01 -o custom-columns=IP:.metadata.annotations.multi-ip-preferences | grep -oE "10.11.0.[0-9]{1,3}")"
-
-echo "Frontend IP is: ${IP}"
