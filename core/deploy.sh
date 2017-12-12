@@ -2,6 +2,11 @@
 
 set -e
 
+SCRIPT=`realpath $0`
+SCRIPTPATH=`dirname $SCRIPT`
+
+cd "${SCRIPTPATH}"
+
 # Prepare vyos image mapping for virtlet
 kubectl apply -f image-mapping.yml
 
@@ -16,6 +21,3 @@ kubectl apply -f stream-source-service.yaml
 # Create VyOS
 kubectl apply -f vyos.yml
 
-IP="$(kubectl describe po vyos | grep "^IP:" | awk '{print $2}')"
-
-echo "Endpoint IP is: ${IP}"
